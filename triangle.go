@@ -51,7 +51,7 @@ func (triangle Triangle) signed_triangle_area() float64 {
 		(triangle.a.y-triangle.c.y)*(triangle.a.x+triangle.c.x))
 }
 
-func boundingTriangle(triangle Triangle, canvas draw.Image, color color.Color) {
+func boundingTriangle(triangle Triangle, canvas draw.Image, color color.Color, zbuffer [][]float64) {
 	if triangle.a.x == triangle.b.x && triangle.b.x == triangle.c.x {
 		return
 	}
@@ -69,12 +69,17 @@ func boundingTriangle(triangle Triangle, canvas draw.Image, color color.Color) {
 
 	for x := bbminx; x <= bbmaxx; x++ {
 		for y := bbminy; y <= bbmaxy; y++ {
-			alpha := Triangle{Point{x, y}, triangle.b, triangle.c}.signed_triangle_area() / total_area
-			beta := Triangle{Point{x, y}, triangle.c, triangle.a}.signed_triangle_area() / total_area
-			gamma := Triangle{Point{x, y}, triangle.a, triangle.b}.signed_triangle_area() / total_area
+			alpha := Triangle{Point{x, y, 0}, triangle.b, triangle.c}.signed_triangle_area() / total_area
+			beta := Triangle{Point{x, y, 0}, triangle.c, triangle.a}.signed_triangle_area() / total_area
+			gamma := Triangle{Point{x, y, 0}, triangle.a, triangle.b}.signed_triangle_area() / total_area
 			if alpha < 0 || beta < 0 || gamma < 0 {
 				continue // negative barycentric coordinate => the pixel is outside the triangle
 			}
+			z := (alpha*triangle.a.z + beta*triangle.b.z + gamma*triangle.c.z)
+			if z <= (zbuffer)[y][x] {
+				continue
+			}
+			zbuffer[y][x] = z
 			canvas.Set(x, y, color)
 		}
 	}
