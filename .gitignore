@@ -1,1 +1,11 @@
 .DS_Store
+
+# test files
+examples/**/*.png
+examples/**/*.xml
+examples/**/*.mvr
+examples/**/*.gdtf
+## test binary
+examples/examples
+## resource profiling
+examples/*.prof
