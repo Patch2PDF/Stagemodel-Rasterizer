@@ -3,7 +3,6 @@ package rasterizer
 import (
 	"fmt"
 	"image"
-	"image/draw"
 	"image/png"
 	"io"
 	"math"
@@ -12,8 +11,8 @@ import (
 type Canvas struct {
 	width   int
 	height  int
-	canvas  draw.Image
-	zbuffer [][]float64
+	canvas  *image.RGBA
+	zbuffer []float64
 }
 
 func (cv *Canvas) Init(width int, height int) {
@@ -22,12 +21,9 @@ func (cv *Canvas) Init(width int, height int) {
 
 	cv.canvas = image.NewRGBA(image.Rect(0, 0, width, height))
 
-	cv.zbuffer = make([][]float64, height)
+	cv.zbuffer = make([]float64, height*width)
 	for i := range cv.zbuffer {
-		cv.zbuffer[i] = make([]float64, width)
-		for j := range cv.zbuffer[i] {
-			cv.zbuffer[i][j] = math.Inf(-1)
-		}
+		cv.zbuffer[i] = math.Inf(-1)
 	}
 }
 
