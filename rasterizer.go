@@ -1,38 +1,96 @@
 package rasterizer
 
 import (
-	"image"
 	"image/color"
-	"image/draw"
-	"image/png"
 	"log"
 	"os"
+
+	"github.com/Patch2PDF/GDTF-Mesh-Reader/v2/pkg/MeshTypes"
+	GDTFTypes "github.com/Patch2PDF/GDTF-Parser/pkg/types"
+	MVRTypes "github.com/Patch2PDF/MVR-Parser/pkg/types"
 )
 
-type Point struct {
-	x int
-	y int
+var colors = map[GDTFTypes.GeometryType]color.RGBA{
+	GDTFTypes.GeometryTypeGeometry:          {25, 25, 25, 255},
+	GDTFTypes.GeometryTypeAxis:              {25, 25, 25, 255},
+	GDTFTypes.GeometryTypeFilterBeam:        {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeFilterColor:       {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeFilterGobo:        {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeFilterShaper:      {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeBeam:              {200, 200, 200, 255},
+	GDTFTypes.GeometryTypeMediaServerLayer:  {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeMediaServerCamera: {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeMediaServerMaster: {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeDisplay:           {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeGeometryReference: {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeLaser:             {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeWiringObject:      {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeInventory:         {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeStructure:         {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeSupport:           {0, 0, 0, 255},
+	GDTFTypes.GeometryTypeMagnet:            {0, 0, 0, 255},
 }
 
-type Triangle struct {
-	a Point
-	b Point
-	c Point
+type Rotation struct {
+	Alpha float64
+	Beta  float64
+	Gamma float64
 }
 
-func Draw() {
-	var canvas draw.Image = image.NewRGBA(image.Rect(0, 0, 127, 127))
+func drawMesh(mesh MeshTypes.Mesh, canvas *Canvas, color color.RGBA) {
+	for _, triangle := range mesh.Triangles {
+		NewTriangleFromMeshTriangle(triangle).boundingTriangle(
+			canvas,
+			color,
+		)
+	}
+}
 
-	scanTriangle(Triangle{a: Point{7, 45}, b: Point{35, 100}, c: Point{45, 60}}, canvas, color.RGBA{255, 0, 0, 255})
-	scanTriangle(Triangle{a: Point{120, 35}, b: Point{90, 5}, c: Point{45, 110}}, canvas, color.RGBA{0, 255, 0, 255})
-	scanTriangle(Triangle{a: Point{115, 83}, b: Point{80, 90}, c: Point{85, 120}}, canvas, color.RGBA{0, 0, 255, 255})
+func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas) {
+	for _, obj := range mesh.SceneObjectModels {
+		for _, part := range obj.MeshModel {
+			drawMesh(part.Mesh, canvas, colors[part.GeometryType]) // TODO: obj type specific colors
+		}
+		for _, geometry := range obj.Geometries {
+			drawMesh(geometry, canvas, color.RGBA{100, 100, 100, 255})
+		}
+	}
 
-	f, err := os.Create("render.png")
+	for _, fixture := range mesh.FixtureModels {
+		for _, part := range fixture.MeshModel {
+			drawMesh(part.Mesh, canvas, colors[part.GeometryType])
+		}
+		for _, geometry := range fixture.Geometries {
+			drawMesh(geometry, canvas, color.RGBA{100, 100, 100, 255})
+		}
+	}
+}
+
+func Draw(mesh *MVRTypes.StageModel, rotation Rotation, filename string) *Canvas {
+	const width = 4000
+	const height = 3000
+
+	canvas := &Canvas{}
+	canvas.Init(width, height)
+
+	normalizeAndRotateStageModel(canvas, mesh, rotation)
+
+	drawStageModel(mesh, canvas)
+
+	return canvas
+}
+
+func SaveCanvasAsPNGFile(filename string, canvas *Canvas) {
+	f, err := os.Create(filename)
 	if err != nil {
 		log.Fatalf("failed to open render: %v", err)
 	}
 
-	png.Encode(f, canvas)
+	err = canvas.SaveAsPNG(f)
+
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
 
 	f.Close()
 }
