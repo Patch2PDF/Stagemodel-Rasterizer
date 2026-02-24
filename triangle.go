@@ -35,6 +35,11 @@ func signed_triangle_area(ax float64, ay float64, bx float64, by float64, cx flo
 	return .5 * ((by-ay)*(bx+ax) + (cy-by)*(cx+bx) + (ay-cy)*(ax+cx))
 }
 
+func get_signed_triangle_area_delta(bx float64, by float64, cx float64, cy float64, inv_total_area float64) (dx float64, dy float64) {
+	factor := inv_total_area * .5
+	return (factor * (by - cy)), (factor * (cx - bx))
+}
+
 func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.RGBA) {
 	if triangle.a.x == triangle.b.x && triangle.b.x == triangle.c.x {
 		return
@@ -55,36 +60,51 @@ func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.RGBA) {
 	bbmaxy := int(math.Max(math.Max(triangle.a.y, triangle.b.y), triangle.c.y))
 
 	inv_total_area := 1 / total_area
-	factor := .5 * inv_total_area
 
-	// precalculating constant edge for each barycentric weight (not related to (x|y))
-	edge_bc := (triangle.c.y - triangle.b.y) * (triangle.c.x + triangle.b.x)
-	edge_ca := (triangle.a.y - triangle.c.y) * (triangle.a.x + triangle.c.x)
-	edge_ab := (triangle.b.y - triangle.a.y) * (triangle.b.x + triangle.a.x)
+	xf, yf := float64(bbminx), float64(bbminy) // casting
+
+	// calculate triangle area change per x / y step
+	alpha_dx, alpha_dy := get_signed_triangle_area_delta(triangle.b.x, triangle.b.y, triangle.c.x, triangle.c.y, inv_total_area)
+	beta_dx, beta_dy := get_signed_triangle_area_delta(triangle.c.x, triangle.c.y, triangle.a.x, triangle.a.y, inv_total_area)
+	gamma_dx, gamma_dy := get_signed_triangle_area_delta(triangle.a.x, triangle.a.y, triangle.b.x, triangle.b.y, inv_total_area)
+
+	// base triangle area in upper left corner
+	row_alpha := signed_triangle_area(xf, yf, triangle.b.x, triangle.b.y, triangle.c.x, triangle.c.y) * inv_total_area
+	row_beta := signed_triangle_area(xf, yf, triangle.c.x, triangle.c.y, triangle.a.x, triangle.a.y) * inv_total_area
+	row_gamma := signed_triangle_area(xf, yf, triangle.a.x, triangle.a.y, triangle.b.x, triangle.b.y) * inv_total_area
 
 	for y := bbminy; y <= bbmaxy; y++ {
 		drawing_canvas := canvas.canvas
 		zBufRowIndex := y * canvas.width
 
+		alpha := row_alpha
+		beta := row_beta
+		gamma := row_gamma
+
+		var z float64
+		var zBufIndex int
+
 		for x := bbminx; x <= bbmaxx; x++ {
-			xf, yf := float64(x), float64(y) // casting
-
-			alpha := factor * ((triangle.b.y-yf)*(triangle.b.x+xf) + edge_bc + (yf-triangle.c.y)*(xf+triangle.c.x))
-			beta := factor * ((triangle.c.y-yf)*(triangle.c.x+xf) + edge_ca + (yf-triangle.a.y)*(xf+triangle.a.x))
-			gamma := factor * ((triangle.a.y-yf)*(triangle.a.x+xf) + edge_ab + (yf-triangle.b.y)*(xf+triangle.b.x))
-
 			if alpha < 0 || beta < 0 || gamma < 0 {
-				continue // negative barycentric coordinate => the pixel is outside the triangle
+				goto inc_area_calc // negative barycentric coordinate => the pixel is outside the triangle
 			}
 
-			z := (alpha*triangle.a.z + beta*triangle.b.z + gamma*triangle.c.z)
-			zBufIndex := zBufRowIndex + x
+			z = (alpha*triangle.a.z + beta*triangle.b.z + gamma*triangle.c.z)
+			zBufIndex = zBufRowIndex + x
 			if z <= (canvas.zbuffer)[zBufIndex] {
-				continue
+				goto inc_area_calc
 			}
 			canvas.zbuffer[zBufIndex] = z
 
 			drawing_canvas.SetRGBA(x, y, color)
+
+		inc_area_calc:
+			alpha += alpha_dx
+			beta += beta_dx
+			gamma += gamma_dx
 		}
+		row_alpha += alpha_dy
+		row_beta += beta_dy
+		row_gamma += gamma_dy
 	}
 }
