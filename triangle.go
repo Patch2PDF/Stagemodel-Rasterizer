@@ -40,7 +40,7 @@ func get_signed_triangle_area_delta(bx float64, by float64, cx float64, cy float
 	return (factor * (by - cy)), (factor * (cx - bx))
 }
 
-func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.RGBA) {
+func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.NRGBA) {
 	if triangle.a.x == triangle.b.x && triangle.b.x == triangle.c.x {
 		return
 	}
@@ -96,7 +96,7 @@ func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.RGBA) {
 			}
 			canvas.zbuffer[zBufIndex] = z
 
-			drawing_canvas.SetRGBA(x, y, color)
+			drawing_canvas.SetNRGBA(x, y, color)
 
 		inc_area_calc:
 			alpha += alpha_dx

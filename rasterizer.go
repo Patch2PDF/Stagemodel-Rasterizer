@@ -10,7 +10,7 @@ import (
 	MVRTypes "github.com/Patch2PDF/MVR-Parser/pkg/types"
 )
 
-var colors = map[GDTFTypes.GeometryType]color.RGBA{
+var colors = map[GDTFTypes.GeometryType]color.NRGBA{
 	GDTFTypes.GeometryTypeGeometry:          {25, 25, 25, 255},
 	GDTFTypes.GeometryTypeAxis:              {25, 25, 25, 255},
 	GDTFTypes.GeometryTypeFilterBeam:        {0, 0, 0, 255},
@@ -37,7 +37,7 @@ type Rotation struct {
 	Gamma float64
 }
 
-func drawMesh(mesh MeshTypes.Mesh, canvas *Canvas, color color.RGBA) {
+func drawMesh(mesh MeshTypes.Mesh, canvas *Canvas, color color.NRGBA) {
 	for _, triangle := range mesh.Triangles {
 		NewTriangleFromMeshTriangle(triangle).boundingTriangle(
 			canvas,
@@ -52,7 +52,7 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas) {
 			drawMesh(part.Mesh, canvas, colors[part.GeometryType]) // TODO: obj type specific colors
 		}
 		for _, geometry := range obj.Geometries {
-			drawMesh(geometry, canvas, color.RGBA{100, 100, 100, 255})
+			drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
 		}
 	}
 
@@ -61,7 +61,7 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas) {
 			drawMesh(part.Mesh, canvas, colors[part.GeometryType])
 		}
 		for _, geometry := range fixture.Geometries {
-			drawMesh(geometry, canvas, color.RGBA{100, 100, 100, 255})
+			drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
 		}
 	}
 }

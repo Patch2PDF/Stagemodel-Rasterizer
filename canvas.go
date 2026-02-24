@@ -11,7 +11,7 @@ import (
 type Canvas struct {
 	width   int
 	height  int
-	canvas  *image.RGBA
+	canvas  *image.NRGBA
 	zbuffer []float64
 }
 
@@ -19,7 +19,7 @@ func (cv *Canvas) Init(width int, height int) {
 	cv.width = width
 	cv.height = height
 
-	cv.canvas = image.NewRGBA(image.Rect(0, 0, width, height))
+	cv.canvas = image.NewNRGBA(image.Rect(0, 0, width, height))
 
 	cv.zbuffer = make([]float64, height*width)
 	for i := range cv.zbuffer {
@@ -28,7 +28,10 @@ func (cv *Canvas) Init(width int, height int) {
 }
 
 func (cv *Canvas) SaveAsPNG(w io.Writer) error {
-	err := png.Encode(w, cv.canvas)
+	encoder := png.Encoder{
+		CompressionLevel: png.DefaultCompression,
+	}
+	err := encoder.Encode(w, cv.canvas)
 	if err != nil {
 		return fmt.Errorf("Error Saving Canvas as PNG: %s", err)
 	}
