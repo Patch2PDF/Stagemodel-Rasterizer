@@ -8,8 +8,11 @@ require (
 	github.com/Patch2PDF/MVR-Parser v0.1.0
 )
 
+require golang.org/x/text v0.34.0 // indirect
+
 require (
 	github.com/qmuntal/gltf v0.28.0 // indirect
+	golang.org/x/image v0.36.0
 	golang.org/x/sync v0.19.0 // indirect
 )
 
