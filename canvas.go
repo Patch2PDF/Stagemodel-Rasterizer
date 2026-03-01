@@ -9,13 +9,15 @@ import (
 )
 
 type Canvas struct {
-	width   int
-	height  int
-	canvas  *image.NRGBA
-	zbuffer []float64
+	width          int
+	height         int
+	canvas         *image.NRGBA
+	zbuffer        []float64
+	label_face     *fontFace
+	fixture_labels []fixtureLabel
 }
 
-func (cv *Canvas) Init(width int, height int) {
+func (cv *Canvas) Init(width int, height int) error {
 	cv.width = width
 	cv.height = height
 
@@ -25,6 +27,17 @@ func (cv *Canvas) Init(width int, height int) {
 	for i := range cv.zbuffer {
 		cv.zbuffer[i] = math.Inf(-1)
 	}
+
+	var err error
+
+	cv.label_face, err = initFontFace(10, 300)
+	if err != nil {
+		return err
+	}
+
+	initFontDrawer(cv.label_face, cv.canvas, 0, 0)
+
+	return nil
 }
 
 func (cv *Canvas) SaveAsPNG(w io.Writer) error {
