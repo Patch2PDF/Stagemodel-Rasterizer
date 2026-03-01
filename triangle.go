@@ -1,6 +1,7 @@
 package rasterizer
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 
@@ -40,24 +41,24 @@ func get_signed_triangle_area_delta(bx float64, by float64, cx float64, cy float
 	return (factor * (by - cy)), (factor * (cx - bx))
 }
 
-func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.NRGBA) {
+func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.NRGBA) (bbminx int, bbminy int, bbmaxx int, bbmaxy int, err error) {
 	if triangle.a.x == triangle.b.x && triangle.b.x == triangle.c.x {
-		return
+		return 0, 0, 0, 0, fmt.Errorf("Triangle has 0 width")
 	}
 	if triangle.a.y == triangle.b.y && triangle.b.y == triangle.c.y {
-		return
+		return 0, 0, 0, 0, fmt.Errorf("Triangle has 0 height")
 	}
 
 	total_area := triangle.signed_triangle_area()
 	if total_area < 1 {
-		return // backface culling + discarding triangles that cover less than a pixel // TODO: test / improve
+		return 0, 0, 0, 0, fmt.Errorf("Triangle area is less than 1 pixel") // backface culling + discarding triangles that cover less than a pixel // TODO: test / improve
 	}
 
-	// TODO: add canvas bounds check
-	bbminx := int(math.Min(math.Min(triangle.a.x, triangle.b.x), triangle.c.x))
-	bbminy := int(math.Min(math.Min(triangle.a.y, triangle.b.y), triangle.c.y))
-	bbmaxx := int(math.Max(math.Max(triangle.a.x, triangle.b.x), triangle.c.x))
-	bbmaxy := int(math.Max(math.Max(triangle.a.y, triangle.b.y), triangle.c.y))
+	// TODO: add canvas bounds check (via min/max with canvas bounds?)
+	bbminx = int(math.Min(math.Min(triangle.a.x, triangle.b.x), triangle.c.x))
+	bbminy = int(math.Min(math.Min(triangle.a.y, triangle.b.y), triangle.c.y))
+	bbmaxx = int(math.Max(math.Max(triangle.a.x, triangle.b.x), triangle.c.x))
+	bbmaxy = int(math.Max(math.Max(triangle.a.y, triangle.b.y), triangle.c.y))
 
 	inv_total_area := 1 / total_area
 
@@ -107,4 +108,6 @@ func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.NRGBA) {
 		row_beta += beta_dy
 		row_gamma += gamma_dy
 	}
+
+	return bbminx, bbminy, bbmaxx, bbmaxy, nil
 }

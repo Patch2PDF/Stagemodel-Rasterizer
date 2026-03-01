@@ -1,8 +1,10 @@
 package rasterizer
 
 import (
+	"fmt"
 	"image/color"
 	"log"
+	"math"
 	"os"
 
 	"github.com/Patch2PDF/GDTF-Mesh-Reader/v2/pkg/MeshTypes"
@@ -37,12 +39,50 @@ type Rotation struct {
 	Gamma float64
 }
 
+type boundingBox struct {
+	left   int
+	top    int
+	right  int
+	bottom int
+}
+
+func (b *boundingBox) init() {
+	b.left = math.MaxInt
+	b.top = math.MaxInt
+	b.right = math.MinInt
+	b.bottom = math.MinInt
+}
+
 func drawMesh(mesh MeshTypes.Mesh, canvas *Canvas, color color.NRGBA) {
 	for _, triangle := range mesh.Triangles {
 		NewTriangleFromMeshTriangle(triangle).boundingTriangle(
 			canvas,
 			color,
 		)
+	}
+}
+
+func drawMeshUpdateBB(mesh MeshTypes.Mesh, canvas *Canvas, color color.NRGBA, bb boundingBox) (boundingBox, error) {
+	triangle_drawn := false
+
+	for _, triangle := range mesh.Triangles {
+		bbminx, bbminy, bbmaxx, bbmaxy, err := NewTriangleFromMeshTriangle(triangle).boundingTriangle(
+			canvas,
+			color,
+		)
+		if err == nil {
+			triangle_drawn = true
+			bb.left = min(bb.left, bbminx)
+			bb.top = min(bb.top, bbminy)
+			bb.right = max(bb.right, bbmaxx)
+			bb.bottom = max(bb.bottom, bbmaxy)
+		}
+	}
+
+	if triangle_drawn {
+		return bb, nil
+	} else {
+		return bb, fmt.Errorf("No triangle was drawn")
 	}
 }
 
@@ -57,27 +97,46 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas) {
 	}
 
 	for _, fixture := range mesh.FixtureModels {
+		bb := boundingBox{}
+		bb.init()
+
 		for _, part := range fixture.MeshModel {
-			drawMesh(part.Mesh, canvas, colors[part.GeometryType])
+			bb, _ = drawMeshUpdateBB(part.Mesh, canvas, colors[part.GeometryType], bb)
 		}
+
+		canvas.fixture_labels = append(
+			canvas.fixture_labels,
+			fixtureLabel{fixture: fixture.Fixture, fixture_bounding_box: bb},
+		)
+
 		for _, geometry := range fixture.Geometries {
 			drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
 		}
 	}
 }
 
-func Draw(mesh *MVRTypes.StageModel, rotation Rotation, filename string) *Canvas {
+func Draw(mesh *MVRTypes.StageModel, rotation Rotation, filename string) (*Canvas, error) {
 	const width = 4000
 	const height = 3000
 
 	canvas := &Canvas{}
-	canvas.Init(width, height)
+	err := canvas.Init(width, height)
+
+	if err != nil {
+		return nil, err
+	}
 
 	normalizeAndRotateStageModel(canvas, mesh, rotation)
 
 	drawStageModel(mesh, canvas)
 
-	return canvas
+	err = drawFixtureLabels(canvas)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return canvas, nil
 }
 
 func SaveCanvasAsPNGFile(filename string, canvas *Canvas) {
