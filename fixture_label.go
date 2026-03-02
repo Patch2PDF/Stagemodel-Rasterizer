@@ -24,11 +24,17 @@ func drawFixtureLabels(canvas *Canvas) error {
 		// y := (bb.bottom-bb.top-height)/2 + bb.top
 		y := bb.bottom + 20
 
-		_, _, err := drawLabelBox(canvas, x, y, label_text, fixture_label_padding)
-		_ = err // TODO: once logic for auto positioning is there, reactivate error forwarding
-		// if err != nil {
-		// 	return err
-		// }
+		rect, err := getAndCheckLabelRect(canvas, x, y, width, height, fixture_label_padding)
+		if err != nil {
+			// TODO: once logic for auto positioning is there, reactivate error forwarding
+			// return err
+			continue
+		}
+
+		drawLabelBackground(canvas, rect)
+		labelFillZBuf(canvas, rect)
+
+		drawLabelText(canvas, x, y, label_text)
 	}
 	return nil
 }

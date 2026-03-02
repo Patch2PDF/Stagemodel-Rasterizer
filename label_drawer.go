@@ -91,35 +91,21 @@ func calcLabelDimensions(canvas *Canvas, text string) (width int, height int) {
 	return width, font_face.font_height * line_count
 }
 
-func drawLabelBox(canvas *Canvas, x int, y int, text string, padding padding) (width int, height int, err error) {
-	font_face := canvas.label_face
+func drawLabelBackground(canvas *Canvas, rect image.Rectangle) {
+	draw.Draw(canvas.canvas, rect, image.NewUniform(color.White), image.Point{}, draw.Src)
+}
 
-	width, height = calcLabelDimensions(canvas, text)
-
-	img := canvas.canvas
-	img_rect := img.Bounds()
-
-	// label border box
-	tex_rect := image.Rect(x-padding.left, y-padding.top, x+width+padding.right, y+height+padding.bottom)
-	if tex_rect.Min.X < img_rect.Min.X || tex_rect.Min.Y < img_rect.Min.Y || tex_rect.Max.X >= img_rect.Max.X || tex_rect.Max.Y >= img_rect.Max.Y {
-		return 0, 0, fmt.Errorf(
-			"Label exceeds image bounds (label: (%d|%d),(%d|%d); img: (%d|%d),(%d|%d))",
-			tex_rect.Min.X, tex_rect.Min.Y,
-			tex_rect.Max.X, tex_rect.Max.Y,
-			img_rect.Min.X, img_rect.Min.Y,
-			img_rect.Max.X, img_rect.Max.Y,
-		)
-	}
-
-	// set background
-	draw.Draw(img, tex_rect, image.NewUniform(color.White), image.Point{}, draw.Src)
-
-	for y_index := tex_rect.Min.Y; y_index < tex_rect.Max.Y; y_index++ {
+func labelFillZBuf(canvas *Canvas, rect image.Rectangle) {
+	for y_index := rect.Min.Y; y_index < rect.Max.Y; y_index++ {
 		zBufRowIndex := (y_index) * canvas.width
-		for x_index := tex_rect.Min.X; x_index < tex_rect.Max.X; x_index++ {
+		for x_index := rect.Min.X; x_index < rect.Max.X; x_index++ {
 			canvas.zbuffer[zBufRowIndex+x_index] = math.MaxInt
 		}
 	}
+}
+
+func drawLabelText(canvas *Canvas, x int, y int, text string) {
+	font_face := canvas.label_face
 
 	font_face.drawer.Dot = fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y + font_face.ascent)}
 
@@ -129,8 +115,22 @@ func drawLabelBox(canvas *Canvas, x int, y int, text string, padding padding) (w
 		font_face.drawer.DrawString(line)
 		font_face.drawer.Dot = fixed.Point26_6{X: fixed.I(x), Y: font_face.drawer.Dot.Y + fixed_height}
 	}
+}
 
-	size := tex_rect.Size()
+func getAndCheckLabelRect(canvas *Canvas, x int, y int, text_width int, text_height int, padding padding) (image.Rectangle, error) {
+	img := canvas.canvas
+	img_rect := img.Bounds()
 
-	return size.X, size.Y, nil
+	// label border box
+	tex_rect := image.Rect(x-padding.left, y-padding.top, x+text_width+padding.right, y+text_height+padding.bottom)
+	if tex_rect.Min.X < img_rect.Min.X || tex_rect.Min.Y < img_rect.Min.Y || tex_rect.Max.X >= img_rect.Max.X || tex_rect.Max.Y >= img_rect.Max.Y {
+		return image.Rectangle{}, fmt.Errorf(
+			"Label exceeds image bounds (label: (%d|%d),(%d|%d); img: (%d|%d),(%d|%d))",
+			tex_rect.Min.X, tex_rect.Min.Y,
+			tex_rect.Max.X, tex_rect.Max.Y,
+			img_rect.Min.X, img_rect.Min.Y,
+			img_rect.Max.X, img_rect.Max.Y,
+		)
+	}
+	return tex_rect, nil
 }
