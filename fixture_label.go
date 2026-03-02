@@ -3,6 +3,7 @@ package rasterizer
 import (
 	"fmt"
 	"image"
+	"image/color"
 
 	MVRTypes "github.com/Patch2PDF/MVR-Parser/pkg/types"
 )
@@ -15,6 +16,12 @@ type fixtureLabel struct {
 var fixture_label_padding = padding{5, 10, 5, 10}
 
 const fixture_distance = 15
+
+var fixture_label_background = color.NRGBA{255, 255, 255, 255}
+
+const fixture_label_border_width = 3
+
+var fixture_label_border_color = color.NRGBA{0, 0, 0, 255}
 
 // candidates for label positioning (order in array decides priority)
 // if no one fits, fall back to more expensive algorithm
@@ -124,7 +131,7 @@ func drawFixtureLabels(canvas *Canvas) error {
 			continue
 		}
 
-		drawLabelBackground(canvas, rect)
+		drawLabelBackground(canvas, rect, fixture_label_background, fixture_label_border_width, fixture_label_border_color)
 		fixtureLabelFillZBuf(canvas, rect)
 
 		drawLabelText(canvas, rect.Min.X+fixture_label_padding.left, rect.Min.Y+fixture_label_padding.top, label_text)

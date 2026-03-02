@@ -20,9 +20,6 @@ var (
 	fontBytes []byte
 )
 
-// const dpi = 72
-// const size = 18
-
 type fontFace struct {
 	face        *font.Face
 	ascent      int
@@ -90,8 +87,19 @@ func calcLabelDimensions(canvas *Canvas, text string) (width int, height int) {
 	return width, font_face.font_height * line_count
 }
 
-func drawLabelBackground(canvas *Canvas, rect image.Rectangle) {
-	draw.Draw(canvas.canvas, rect, image.NewUniform(color.White), image.Point{}, draw.Src)
+func drawLabelBackground(canvas *Canvas, rect image.Rectangle, background_color color.NRGBA, border_width int, border_color color.NRGBA) {
+	draw.Draw(
+		canvas.canvas,
+		image.Rectangle{
+			Min: image.Point{rect.Min.X + border_width, rect.Min.Y + border_width},
+			Max: image.Point{rect.Max.X - border_width, rect.Max.Y - border_width},
+		},
+		image.NewUniform(background_color),
+		image.Point{},
+		draw.Src,
+	)
+
+	frame(canvas.canvas, rect, border_width, border_color)
 }
 
 func drawLabelText(canvas *Canvas, x int, y int, text string) {
