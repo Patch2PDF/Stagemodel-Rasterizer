@@ -1,6 +1,7 @@
 package rasterizer
 
 import (
+	"image"
 	"image/color"
 	"image/draw"
 	"math"
@@ -25,5 +26,22 @@ func line(ax int, ay int, bx int, by int, canvas draw.Image, color color.Color) 
 			canvas.Set(x, int(math.Round(y)), color)
 		}
 		y += float64(by-ay) / float64(bx-ax)
+	}
+}
+
+func frame(canvas *image.NRGBA, rect image.Rectangle, line_width int, color color.NRGBA) {
+	for y := rect.Min.Y; y < rect.Max.Y; y++ {
+		if y <= rect.Min.Y+line_width || y >= rect.Max.Y-line_width-1 {
+			for x := rect.Min.X; x < rect.Max.X; x++ {
+				canvas.SetNRGBA(x, y, color)
+			}
+		} else {
+			for x := rect.Min.X; x <= rect.Min.X+line_width; x++ {
+				canvas.SetNRGBA(x, y, color)
+			}
+			for x := rect.Max.X - line_width - 1; x < rect.Max.X; x++ {
+				canvas.SetNRGBA(x, y, color)
+			}
+		}
 	}
 }
