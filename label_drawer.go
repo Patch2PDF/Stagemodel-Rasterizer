@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"fmt"
 	"image"
-	"math"
 	"strings"
 
 	"image/color"
@@ -95,15 +94,6 @@ func drawLabelBackground(canvas *Canvas, rect image.Rectangle) {
 	draw.Draw(canvas.canvas, rect, image.NewUniform(color.White), image.Point{}, draw.Src)
 }
 
-func labelFillZBuf(canvas *Canvas, rect image.Rectangle) {
-	for y_index := rect.Min.Y; y_index < rect.Max.Y; y_index++ {
-		zBufRowIndex := (y_index) * canvas.width
-		for x_index := rect.Min.X; x_index < rect.Max.X; x_index++ {
-			canvas.zbuffer[zBufRowIndex+x_index] = math.MaxInt
-		}
-	}
-}
-
 func drawLabelText(canvas *Canvas, x int, y int, text string) {
 	font_face := canvas.label_face
 
@@ -117,12 +107,12 @@ func drawLabelText(canvas *Canvas, x int, y int, text string) {
 	}
 }
 
-func getAndCheckLabelRect(canvas *Canvas, x int, y int, text_width int, text_height int, padding padding) (image.Rectangle, error) {
+func getAndCheckLabelRect(canvas *Canvas, x int, y int, width int, height int) (image.Rectangle, error) {
 	img := canvas.canvas
 	img_rect := img.Bounds()
 
 	// label border box
-	tex_rect := image.Rect(x-padding.left, y-padding.top, x+text_width+padding.right, y+text_height+padding.bottom)
+	tex_rect := image.Rect(x, y, x+width, y+height)
 	if tex_rect.Min.X < img_rect.Min.X || tex_rect.Min.Y < img_rect.Min.Y || tex_rect.Max.X >= img_rect.Max.X || tex_rect.Max.Y >= img_rect.Max.Y {
 		return image.Rectangle{}, fmt.Errorf(
 			"Label exceeds image bounds (label: (%d|%d),(%d|%d); img: (%d|%d),(%d|%d))",
