@@ -41,7 +41,15 @@ func get_signed_triangle_area_delta(bx float64, by float64, cx float64, cy float
 	return (factor * (by - cy)), (factor * (cx - bx))
 }
 
-func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.NRGBA) (bbminx int, bbminy int, bbmaxx int, bbmaxy int, err error) {
+// the default behavior for boundingTriangles perPixelPreCallback
+func defaultPerPixelPreCallback(canvas *Canvas, x int, y int) bool {
+	return false
+}
+
+// perPixelPreCallback is called for each pixel after checking zbuffer but before updating it.
+// NOTE: When perPixelPreCallback returns true, drawing this pixel will be skipped
+// for default, use `defaultPerPixelPreCallback`
+func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.NRGBA, perPixelPreCallback func(canvas *Canvas, x int, y int) bool) (bbminx int, bbminy int, bbmaxx int, bbmaxy int, err error) {
 	if triangle.a.x == triangle.b.x && triangle.b.x == triangle.c.x {
 		return 0, 0, 0, 0, fmt.Errorf("Triangle has 0 width")
 	}
@@ -95,6 +103,11 @@ func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.NRGBA) (bb
 			if z <= (canvas.zbuffer)[zBufIndex] {
 				goto inc_area_calc
 			}
+
+			if perPixelPreCallback(canvas, x, y) {
+				goto inc_area_calc
+			}
+
 			canvas.zbuffer[zBufIndex] = z
 
 			drawing_canvas.SetNRGBA(x, y, color)

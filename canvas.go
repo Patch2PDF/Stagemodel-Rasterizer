@@ -15,6 +15,7 @@ type Canvas struct {
 	zbuffer        []float64
 	label_face     *fontFace
 	fixture_labels []fixtureLabel
+	fixture_zbuf   []bool // used for label placement to search for "free" pixels
 }
 
 func (cv *Canvas) Init(width int, height int) error {
@@ -22,6 +23,8 @@ func (cv *Canvas) Init(width int, height int) error {
 	cv.height = height
 
 	cv.canvas = image.NewNRGBA(image.Rect(0, 0, width, height))
+
+	cv.fixture_zbuf = make([]bool, height*width)
 
 	cv.zbuffer = make([]float64, height*width)
 	for i := range cv.zbuffer {

@@ -58,8 +58,14 @@ func drawMesh(mesh MeshTypes.Mesh, canvas *Canvas, color color.NRGBA) {
 		NewTriangleFromMeshTriangle(triangle).boundingTriangle(
 			canvas,
 			color,
+			defaultPerPixelPreCallback,
 		)
 	}
+}
+
+func perPixelPreCallbackUpdateFixtureZBuf(canvas *Canvas, x int, y int) bool {
+	canvas.fixture_zbuf[y*canvas.width+x] = true
+	return false
 }
 
 func drawMeshUpdateBB(mesh MeshTypes.Mesh, canvas *Canvas, color color.NRGBA, bb boundingBox) (boundingBox, error) {
@@ -69,6 +75,7 @@ func drawMeshUpdateBB(mesh MeshTypes.Mesh, canvas *Canvas, color color.NRGBA, bb
 		bbminx, bbminy, bbmaxx, bbmaxy, err := NewTriangleFromMeshTriangle(triangle).boundingTriangle(
 			canvas,
 			color,
+			perPixelPreCallbackUpdateFixtureZBuf,
 		)
 		if err == nil {
 			triangle_drawn = true
