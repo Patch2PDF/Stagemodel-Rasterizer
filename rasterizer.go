@@ -90,6 +90,16 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config Rasterizer
 		}
 	}
 
+	for _, obj := range mesh.FocusPointModels {
+		geometry_color, err := colors.getGeometriesColor(ModelTypeFocusPoint)
+		if err != nil {
+			return fmt.Errorf("Could not draw stage model: %s", err)
+		}
+		for _, geometry := range obj.Geometries {
+			drawMesh(geometry, canvas, geometry_color)
+		}
+	}
+
 	if config.RenderLabels {
 		for _, fixture := range mesh.FixtureModels {
 			bb := boundingBox{}
@@ -135,6 +145,75 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config Rasterizer
 			}
 		}
 	}
+
+	for _, obj := range mesh.SupportModels {
+		for _, part := range obj.MeshModel {
+			color, err := colors.getColor(ModelTypeSupport, part.GeometryType)
+			if err != nil {
+				return fmt.Errorf("Could not draw stage model: %s", err)
+			}
+			drawMesh(part.Mesh, canvas, color)
+		}
+		geometry_color, err := colors.getGeometriesColor(ModelTypeSupport)
+		if err != nil {
+			return fmt.Errorf("Could not draw stage model: %s", err)
+		}
+		for _, geometry := range obj.Geometries {
+			drawMesh(geometry, canvas, geometry_color)
+		}
+	}
+
+	for _, obj := range mesh.TrussModels {
+		for _, part := range obj.MeshModel {
+			color, err := colors.getColor(ModelTypeTruss, part.GeometryType)
+			if err != nil {
+				return fmt.Errorf("Could not draw stage model: %s", err)
+			}
+			drawMesh(part.Mesh, canvas, color)
+		}
+		geometry_color, err := colors.getGeometriesColor(ModelTypeTruss)
+		if err != nil {
+			return fmt.Errorf("Could not draw stage model: %s", err)
+		}
+		for _, geometry := range obj.Geometries {
+			drawMesh(geometry, canvas, geometry_color)
+		}
+	}
+
+	for _, obj := range mesh.VideoScreenModels {
+		for _, part := range obj.MeshModel {
+			color, err := colors.getColor(ModelTypeVideoScreen, part.GeometryType)
+			if err != nil {
+				return fmt.Errorf("Could not draw stage model: %s", err)
+			}
+			drawMesh(part.Mesh, canvas, color)
+		}
+		geometry_color, err := colors.getGeometriesColor(ModelTypeVideoScreen)
+		if err != nil {
+			return fmt.Errorf("Could not draw stage model: %s", err)
+		}
+		for _, geometry := range obj.Geometries {
+			drawMesh(geometry, canvas, geometry_color)
+		}
+	}
+
+	for _, obj := range mesh.ProjectorModels {
+		for _, part := range obj.MeshModel {
+			color, err := colors.getColor(ModelTypeProjector, part.GeometryType)
+			if err != nil {
+				return fmt.Errorf("Could not draw stage model: %s", err)
+			}
+			drawMesh(part.Mesh, canvas, color)
+		}
+		geometry_color, err := colors.getGeometriesColor(ModelTypeProjector)
+		if err != nil {
+			return fmt.Errorf("Could not draw stage model: %s", err)
+		}
+		for _, geometry := range obj.Geometries {
+			drawMesh(geometry, canvas, geometry_color)
+		}
+	}
+
 	return nil
 }
 
