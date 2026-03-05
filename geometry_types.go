@@ -21,6 +21,7 @@ const (
 	GeometryTypeStructure         GeometryType = "Structure"
 	GeometryTypeSupport           GeometryType = "Support"
 	GeometryTypeMagnet            GeometryType = "Magnet"
+	GeometryTypeGeometries        GeometryType = "Geometries" // used for seperately provided Geometries in MVR
 )
 
 var geometryTypes []GeometryType = []GeometryType{
@@ -42,4 +43,5 @@ var geometryTypes []GeometryType = []GeometryType{
 	GeometryTypeStructure,
 	GeometryTypeSupport,
 	GeometryTypeMagnet,
+	GeometryTypeGeometries,
 }

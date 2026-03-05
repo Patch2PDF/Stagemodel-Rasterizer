@@ -29,6 +29,7 @@ var default_colors = map[GeometryType]color.NRGBA{
 	GeometryTypeStructure:         {0, 0, 0, 255},
 	GeometryTypeSupport:           {0, 0, 0, 255},
 	GeometryTypeMagnet:            {0, 0, 0, 255},
+	GeometryTypeGeometries:        {100, 100, 100, 255},
 }
 
 var fromGDTFGeometryMap = map[GDTFTypes.GeometryType]GeometryType{
@@ -51,8 +52,6 @@ var fromGDTFGeometryMap = map[GDTFTypes.GeometryType]GeometryType{
 	GDTFTypes.GeometryTypeSupport:           GeometryTypeSupport,
 	GDTFTypes.GeometryTypeWiringObject:      GeometryTypeWiringObject,
 }
-
-// TODO: add "global" override
 
 func getOverrideColors(overrides OverrideColorMap) colorMap {
 	result := make(colorMap)
@@ -79,4 +78,15 @@ func (colors colorMap) getColor(modelType ModelType, geometryType GDTFTypes.Geom
 		return color.NRGBA{}, fmt.Errorf("Invalid model type %d", modelType)
 	}
 	return modelColors[nonGDTFGeometryType], nil
+}
+
+func (colors colorMap) getGeometriesColor(modelType ModelType) (color.NRGBA, error) {
+	modelColors, ok := colors[modelType]
+	if !ok {
+		return color.NRGBA{}, fmt.Errorf("Invalid model type %d", modelType)
+	}
+	if _, ok := modelColors[GeometryTypeGeometries]; !ok {
+		return color.NRGBA{}, fmt.Errorf("Geometries color is undefined for model type %d", modelType)
+	}
+	return modelColors[GeometryTypeGeometries], nil
 }

@@ -81,8 +81,12 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config Rasterizer
 			}
 			drawMesh(part.Mesh, canvas, color)
 		}
+		geometry_color, err := colors.getGeometriesColor(ModelTypeSceneObject)
+		if err != nil {
+			return fmt.Errorf("Could not draw stage model: %s", err)
+		}
 		for _, geometry := range obj.Geometries {
-			drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
+			drawMesh(geometry, canvas, geometry_color)
 		}
 	}
 
@@ -104,8 +108,12 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config Rasterizer
 				fixtureLabel{fixture: fixture.Fixture, fixture_bounding_box: bb},
 			)
 
+			geometry_color, err := colors.getGeometriesColor(ModelTypeFixture)
+			if err != nil {
+				return fmt.Errorf("Could not draw stage model: %s", err)
+			}
 			for _, geometry := range fixture.Geometries {
-				drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
+				drawMesh(geometry, canvas, geometry_color)
 			}
 		}
 	} else {
@@ -118,8 +126,12 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config Rasterizer
 				drawMesh(part.Mesh, canvas, color)
 			}
 
+			geometry_color, err := colors.getGeometriesColor(ModelTypeFixture)
+			if err != nil {
+				return fmt.Errorf("Could not draw stage model: %s", err)
+			}
 			for _, geometry := range fixture.Geometries {
-				drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
+				drawMesh(geometry, canvas, geometry_color)
 			}
 		}
 	}
@@ -139,7 +151,11 @@ func Draw(mesh *MVRTypes.StageModel, config RasterizerConfig) (*Canvas, error) {
 
 	normalizeAndRotateStageModel(canvas, mesh, config.Rotation)
 
-	drawStageModel(mesh, canvas, config)
+	err = drawStageModel(mesh, canvas, config)
+
+	if err != nil {
+		return nil, err
+	}
 
 	err = drawFixtureLabels(canvas)
 
