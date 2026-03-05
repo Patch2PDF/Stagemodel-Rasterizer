@@ -218,11 +218,8 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config Rasterizer
 }
 
 func Draw(mesh *MVRTypes.StageModel, config RasterizerConfig) (*Canvas, error) {
-	const width = 4000
-	const height = 3000
-
 	canvas := &Canvas{}
-	err := canvas.Init(width, height)
+	err := canvas.Init(config.CanvasConfig)
 
 	if err != nil {
 		return nil, err

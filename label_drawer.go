@@ -15,11 +15,6 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-var (
-	//go:embed fonts/DejaVuSansMono.ttf
-	fontBytes []byte
-)
-
 type fontFace struct {
 	face        *font.Face
 	ascent      int
@@ -35,7 +30,7 @@ type padding struct {
 	left   int
 }
 
-func initFontFace(size float64, dpi float64) (*fontFace, error) {
+func initFontFace(size float64, dpi float64, fontBytes []byte) (*fontFace, error) {
 	parsed_font, err := opentype.Parse(fontBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse font bytes: %v", err)

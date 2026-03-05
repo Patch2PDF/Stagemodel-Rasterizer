@@ -18,22 +18,22 @@ type Canvas struct {
 	fixture_zbuf   []bool // used for label placement to search for "free" pixels
 }
 
-func (cv *Canvas) Init(width int, height int) error {
-	cv.width = width
-	cv.height = height
+func (cv *Canvas) Init(canvasConfig CanvasConfig) error {
+	cv.width = canvasConfig.Width
+	cv.height = canvasConfig.Height
 
-	cv.canvas = image.NewNRGBA(image.Rect(0, 0, width, height))
+	cv.canvas = image.NewNRGBA(image.Rect(0, 0, canvasConfig.Width, canvasConfig.Height))
 
-	cv.fixture_zbuf = make([]bool, height*width)
+	cv.fixture_zbuf = make([]bool, canvasConfig.Height*canvasConfig.Width)
 
-	cv.zbuffer = make([]float64, height*width)
+	cv.zbuffer = make([]float64, canvasConfig.Height*canvasConfig.Width)
 	for i := range cv.zbuffer {
 		cv.zbuffer[i] = math.Inf(-1)
 	}
 
 	var err error
 
-	cv.label_face, err = initFontFace(10, 300)
+	cv.label_face, err = initFontFace(canvasConfig.LabelFontSize, canvasConfig.LabelDPI, canvasConfig.LabelFont)
 	if err != nil {
 		return err
 	}
