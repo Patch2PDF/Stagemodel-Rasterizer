@@ -8,30 +8,8 @@ import (
 	"os"
 
 	"github.com/Patch2PDF/GDTF-Mesh-Reader/v2/pkg/MeshTypes"
-	GDTFTypes "github.com/Patch2PDF/GDTF-Parser/pkg/types"
 	MVRTypes "github.com/Patch2PDF/MVR-Parser/pkg/types"
 )
-
-var colors = map[GDTFTypes.GeometryType]color.NRGBA{
-	GDTFTypes.GeometryTypeGeometry:          {25, 25, 25, 255},
-	GDTFTypes.GeometryTypeAxis:              {25, 25, 25, 255},
-	GDTFTypes.GeometryTypeFilterBeam:        {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeFilterColor:       {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeFilterGobo:        {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeFilterShaper:      {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeBeam:              {200, 200, 200, 255},
-	GDTFTypes.GeometryTypeMediaServerLayer:  {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeMediaServerCamera: {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeMediaServerMaster: {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeDisplay:           {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeGeometryReference: {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeLaser:             {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeWiringObject:      {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeInventory:         {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeStructure:         {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeSupport:           {0, 0, 0, 255},
-	GDTFTypes.GeometryTypeMagnet:            {0, 0, 0, 255},
-}
 
 type Rotation struct {
 	Alpha float64
@@ -93,10 +71,15 @@ func drawMeshUpdateBB(mesh MeshTypes.Mesh, canvas *Canvas, color color.NRGBA, bb
 	}
 }
 
-func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config RasterizerConfig) {
+func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config RasterizerConfig) error {
+	colors := getOverrideColors(config.OverrideColors)
 	for _, obj := range mesh.SceneObjectModels {
 		for _, part := range obj.MeshModel {
-			drawMesh(part.Mesh, canvas, colors[part.GeometryType]) // TODO: obj type specific colors
+			color, err := colors.getColor(ModelTypeSceneObject, part.GeometryType)
+			if err != nil {
+				return fmt.Errorf("Could not draw stage model: %s", err)
+			}
+			drawMesh(part.Mesh, canvas, color)
 		}
 		for _, geometry := range obj.Geometries {
 			drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
@@ -109,7 +92,11 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config Rasterizer
 			bb.init()
 
 			for _, part := range fixture.MeshModel {
-				bb, _ = drawMeshUpdateBB(part.Mesh, canvas, colors[part.GeometryType], bb)
+				color, err := colors.getColor(ModelTypeFixture, part.GeometryType)
+				if err != nil {
+					return fmt.Errorf("Could not draw stage model: %s", err)
+				}
+				bb, _ = drawMeshUpdateBB(part.Mesh, canvas, color, bb)
 			}
 
 			canvas.fixture_labels = append(
@@ -124,7 +111,11 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config Rasterizer
 	} else {
 		for _, fixture := range mesh.FixtureModels {
 			for _, part := range fixture.MeshModel {
-				drawMesh(part.Mesh, canvas, colors[part.GeometryType])
+				color, err := colors.getColor(ModelTypeFixture, part.GeometryType)
+				if err != nil {
+					return fmt.Errorf("Could not draw stage model: %s", err)
+				}
+				drawMesh(part.Mesh, canvas, color)
 			}
 
 			for _, geometry := range fixture.Geometries {
@@ -132,6 +123,7 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config Rasterizer
 			}
 		}
 	}
+	return nil
 }
 
 func Draw(mesh *MVRTypes.StageModel, config RasterizerConfig) (*Canvas, error) {
