@@ -93,7 +93,7 @@ func drawMeshUpdateBB(mesh MeshTypes.Mesh, canvas *Canvas, color color.NRGBA, bb
 	}
 }
 
-func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas) {
+func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas, config RasterizerConfig) {
 	for _, obj := range mesh.SceneObjectModels {
 		for _, part := range obj.MeshModel {
 			drawMesh(part.Mesh, canvas, colors[part.GeometryType]) // TODO: obj type specific colors
@@ -103,26 +103,38 @@ func drawStageModel(mesh *MVRTypes.StageModel, canvas *Canvas) {
 		}
 	}
 
-	for _, fixture := range mesh.FixtureModels {
-		bb := boundingBox{}
-		bb.init()
+	if config.RenderLabels {
+		for _, fixture := range mesh.FixtureModels {
+			bb := boundingBox{}
+			bb.init()
 
-		for _, part := range fixture.MeshModel {
-			bb, _ = drawMeshUpdateBB(part.Mesh, canvas, colors[part.GeometryType], bb)
+			for _, part := range fixture.MeshModel {
+				bb, _ = drawMeshUpdateBB(part.Mesh, canvas, colors[part.GeometryType], bb)
+			}
+
+			canvas.fixture_labels = append(
+				canvas.fixture_labels,
+				fixtureLabel{fixture: fixture.Fixture, fixture_bounding_box: bb},
+			)
+
+			for _, geometry := range fixture.Geometries {
+				drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
+			}
 		}
+	} else {
+		for _, fixture := range mesh.FixtureModels {
+			for _, part := range fixture.MeshModel {
+				drawMesh(part.Mesh, canvas, colors[part.GeometryType])
+			}
 
-		canvas.fixture_labels = append(
-			canvas.fixture_labels,
-			fixtureLabel{fixture: fixture.Fixture, fixture_bounding_box: bb},
-		)
-
-		for _, geometry := range fixture.Geometries {
-			drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
+			for _, geometry := range fixture.Geometries {
+				drawMesh(geometry, canvas, color.NRGBA{100, 100, 100, 255})
+			}
 		}
 	}
 }
 
-func Draw(mesh *MVRTypes.StageModel, rotation Rotation, filename string) (*Canvas, error) {
+func Draw(mesh *MVRTypes.StageModel, config RasterizerConfig) (*Canvas, error) {
 	const width = 4000
 	const height = 3000
 
@@ -133,9 +145,9 @@ func Draw(mesh *MVRTypes.StageModel, rotation Rotation, filename string) (*Canva
 		return nil, err
 	}
 
-	normalizeAndRotateStageModel(canvas, mesh, rotation)
+	normalizeAndRotateStageModel(canvas, mesh, config.Rotation)
 
-	drawStageModel(mesh, canvas)
+	drawStageModel(mesh, canvas, config)
 
 	err = drawFixtureLabels(canvas)
 
