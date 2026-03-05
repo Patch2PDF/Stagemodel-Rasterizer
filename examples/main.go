@@ -11,7 +11,7 @@ import (
 	GDTFMeshReader "github.com/Patch2PDF/GDTF-Mesh-Reader/v2"
 	MVRParser "github.com/Patch2PDF/MVR-Parser"
 	MVRTypes "github.com/Patch2PDF/MVR-Parser/pkg/types"
-	rasterizer "github.com/Patch2PDF/Rasterizer"
+	rasterizer "github.com/Patch2PDF/Stagemodel-Rasterizer"
 )
 
 var config = MVRTypes.MVRParserConfig{

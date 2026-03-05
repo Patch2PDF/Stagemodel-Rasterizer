@@ -1,4 +1,4 @@
-module github.com/Patch2PDF/Rasterizer
+module github.com/Patch2PDF/Stagemodel-Rasterizer
 
 go 1.25.6
 
@@ -20,4 +20,4 @@ require (
 
 // replace github.com/Patch2PDF/GDTF-Parser => ../GDTF-Parser
 
-// replace github.com/Patch2PDF/MVR-Parser => ../MVR-Parser
+replace github.com/Patch2PDF/MVR-Parser => ../MVR-Parser
