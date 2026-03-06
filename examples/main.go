@@ -9,6 +9,7 @@ import (
 	"runtime/pprof"
 
 	GDTFMeshReader "github.com/Patch2PDF/GDTF-Mesh-Reader/v2"
+	"github.com/Patch2PDF/GDTF-Mesh-Reader/v2/pkg/MeshTypes"
 	MVRParser "github.com/Patch2PDF/MVR-Parser"
 	MVRTypes "github.com/Patch2PDF/MVR-Parser/pkg/types"
 	rasterizer "github.com/Patch2PDF/Stagemodel-Rasterizer"
@@ -42,14 +43,6 @@ func main() {
 		log.Fatalf("%s", err)
 	}
 	GDTFMeshReader.LoadPrimitives()
-
-	// content, err := gdtf.ParseGDTFByFilename("test.gdtf", true, false)
-	// // content, err := gdtf.ParseGDTFByFilename("test3.gdtf", true, false)
-	// if err != nil {
-	// 	log.Fatalf("%s", err)
-	// }
-	// mesh, err := content.BuildMesh("32Ch")
-	// // mesh, err := content.BuildMesh("36 channel")
 
 	mvr, err := zip.OpenReader("test5.mvr")
 	if err != nil {
@@ -87,13 +80,6 @@ func main() {
 
 	stage_model := mvrData.GetStageModel(model_config)
 
-	stageModelCopy1 := stage_model.Copy()
-	stageModelCopy2 := stage_model.Copy()
-	// TODO: instead of copy, rotate back? (multiply new matrix with inverse of previous) --> need to add function to Mesh-Reader module
-
-	// buf1 := &bytes.Buffer{}
-	// buf2 := &bytes.Buffer{}
-
 	overrideColors := rasterizer.OverrideColorMap{
 		// rasterizer.ModelTypeFixture: map[rasterizer.GeometryType]*color.NRGBA{
 		// 	rasterizer.GeometryTypeAxis: {R: 255, G: 0, B: 0, A: 255},
@@ -109,28 +95,20 @@ func main() {
 		LabelFontSize: 10,
 	}
 
-	canvas1, err := rasterizer.Draw(&stageModelCopy1, rasterizer.RasterizerConfig{RenderLabels: true, Rotation: rasterizer.Rotation{Alpha: 80, Beta: 0, Gamma: 200}, OverrideColors: overrideColors, CanvasConfig: canvasConfig})
+	rotation1 := MeshTypes.GenerateRotationMatrix(80, 0, 200)
+	canvas1, err := rasterizer.Draw(&stage_model, rasterizer.RasterizerConfig{RenderLabels: false, Rotation: rotation1, OverrideColors: overrideColors, CanvasConfig: canvasConfig})
 	if err != nil {
 		log.Fatal(err)
 	}
-	// canvas1.SaveAsPNG(buf1)
+
+	rotation2 := MeshTypes.GenerateRotationMatrix(90, 0, 180)
+	rotation2 = rotation2.ReverseTransformation(rotation1)
 	rasterizer.SaveCanvasAsPNGFile("side.png", canvas1)
-	canvas2, err := rasterizer.Draw(&stageModelCopy2, rasterizer.RasterizerConfig{RenderLabels: true, Rotation: rasterizer.Rotation{Alpha: 90, Beta: 0, Gamma: 180}, OverrideColors: overrideColors, CanvasConfig: canvasConfig})
+	canvas2, err := rasterizer.Draw(&stage_model, rasterizer.RasterizerConfig{RenderLabels: true, Rotation: rotation2, OverrideColors: overrideColors, CanvasConfig: canvasConfig})
 	if err != nil {
 		log.Fatal(err)
 	}
-	// canvas2.SaveAsPNG(buf2)
 	rasterizer.SaveCanvasAsPNGFile("front.png", canvas2)
-
-	// eg := errgroup.Group{}
-
-	// for range 2 {
-	// 	eg.Go(func() error {
-	// 		rasterizer.SaveCanvasAsPNGFile()
-	// 	})
-	// }
-
-	// wg.Wait()
 
 	pprof.StopCPUProfile()
 
@@ -141,26 +119,3 @@ func main() {
 
 	f.Close()
 }
-
-// func main() {
-// 	// fmt.Printf("%s", rasterizer.DrawLabel(0, 0))
-// 	// rasterizer.InitFace()
-
-// 	// dst := image.NewNRGBA(image.Rect(0, 0, 110, 50))
-
-// 	// fmt.Println(rasterizer.DrawLabelBox(dst, 0, 0, "Lgtm rtfm\nexcept you"))
-
-// 	// f, err := os.Create("out.png")
-// 	// if err != nil {
-// 	// 	log.Fatalf("failed to create file: %v", err)
-// 	// }
-// 	// defer f.Close()
-
-// 	// if err := png.Encode(f, dst); err != nil {
-// 	// 	log.Fatalf("failed to encode image: %v", err)
-// 	// }
-// 	err := rasterizer.DrawLabel(0, 0, "Lgtm rtfm\nexcept you")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }

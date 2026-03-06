@@ -69,9 +69,8 @@ func calculateStageModelMinAndMax(stageModel *StageModel) (min MeshTypes.Vector,
 	return min, max
 }
 
-func normalizeAndRotateStageModel(canvas *Canvas, stageModel *StageModel, rotation Rotation) {
+func normalizeAndRotateStageModel(canvas *Canvas, stageModel *StageModel, rotationMatrix MeshTypes.Matrix) {
 	// rotate
-	rotationMatrix := generateRotationMatrix(rotation.Alpha, rotation.Beta, rotation.Gamma)
 	rotateAndTranslateStageModel(stageModel, rotationMatrix)
 
 	// get bounding box
