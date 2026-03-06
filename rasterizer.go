@@ -11,12 +11,6 @@ import (
 	MVRTypes "github.com/Patch2PDF/MVR-Parser/pkg/types"
 )
 
-type Rotation struct {
-	Alpha float64
-	Beta  float64
-	Gamma float64
-}
-
 type boundingBox struct {
 	left   int
 	top    int
