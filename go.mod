@@ -3,9 +3,9 @@ module github.com/Patch2PDF/Stagemodel-Rasterizer
 go 1.25.6
 
 require (
-	github.com/Patch2PDF/GDTF-Mesh-Reader/v2 v2.0.1
-	github.com/Patch2PDF/GDTF-Parser v0.3.0
-	github.com/Patch2PDF/MVR-Parser v0.2.0
+	github.com/Patch2PDF/GDTF-Mesh-Reader/v2 v2.1.0
+	github.com/Patch2PDF/GDTF-Parser v0.4.0
+	github.com/Patch2PDF/MVR-Parser v0.3.0
 )
 
 require golang.org/x/text v0.34.0 // indirect
