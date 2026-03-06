@@ -1,0 +1,90 @@
+name: PR Checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  Format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.6'
+          check-latest: true
+
+      - name: Format
+        run: |
+          # List files that would be reformatted
+          unformatted=$(go fmt ./...)
+          if [ -n "$unformatted" ]; then
+            echo "The following files are not properly formatted:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+  Vet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.6'
+          check-latest: true
+
+      - name: Vet
+        run: |
+          result=$(go vet ./...)
+          if [ -n "$result" ]; then
+            echo "The following errors were reported by 'vet':"
+            echo "$result"
+            exit 1
+          fi
+
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.6'
+          check-latest: true
+
+      - name: Build
+        run: |
+          result=$(go build ./...)
+          if [ -n "$result" ]; then
+            echo "The following errors were reported by 'build':"
+            echo "$result"
+            exit 1
+          fi
+
+  # Test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v5
+
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v6
+  #       with:
+  #         go-version: '1.25.6'
+  #         check-latest: true
+
+  #     - name: Test
+  #       run: |
+  #         go test -coverprofile=cover.out ./tests/... -coverpkg=./pkg/...,.,./internal/...
+
+  #     - name: Coverage Report
+  #       uses: Jannik-Hm/go-test-coverage-report@v1.1
+  #       with:
+  #         coverprofile: cover.out
