@@ -57,16 +57,26 @@ func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.NRGBA, per
 		return 0, 0, 0, 0, fmt.Errorf("Triangle has 0 height")
 	}
 
-	total_area := triangle.signed_triangle_area()
+	total_area := math.Abs(triangle.signed_triangle_area()) // absolute to disable backface culling
 	if total_area < 1 {
-		return 0, 0, 0, 0, fmt.Errorf("Triangle area is less than 1 pixel") // backface culling + discarding triangles that cover less than a pixel // TODO: test / improve
+		return 0, 0, 0, 0, fmt.Errorf("Triangle area is less than 1 pixel") // discarding triangles that cover less than a pixel
 	}
 
-	// TODO: add canvas bounds check (via min/max with canvas bounds?)
-	bbminx = int(math.Min(math.Min(triangle.a.x, triangle.b.x), triangle.c.x))
-	bbminy = int(math.Min(math.Min(triangle.a.y, triangle.b.y), triangle.c.y))
-	bbmaxx = int(math.Max(math.Max(triangle.a.x, triangle.b.x), triangle.c.x))
-	bbmaxy = int(math.Max(math.Max(triangle.a.y, triangle.b.y), triangle.c.y))
+	// outer min / max resembles a canvas bounds check (0 to width/height)
+	borders := canvas.canvas.Rect
+	minx := math.Min(math.Min(triangle.a.x, triangle.b.x), triangle.c.x)
+	miny := math.Min(math.Min(triangle.a.y, triangle.b.y), triangle.c.y)
+	maxx := math.Max(math.Max(triangle.a.x, triangle.b.x), triangle.c.x)
+	maxy := math.Max(math.Max(triangle.a.y, triangle.b.y), triangle.c.y)
+
+	bbminx = max(int(math.Floor(minx)), borders.Min.X)
+	bbminy = max(int(math.Floor(miny)), borders.Min.Y)
+	bbmaxx = min(int(math.Ceil(maxx)), borders.Max.X-1)
+	bbmaxy = min(int(math.Ceil(maxy)), borders.Max.Y-1)
+
+	if bbminx > bbmaxx || bbminy > bbmaxy {
+		return
+	}
 
 	inv_total_area := 1 / total_area
 
