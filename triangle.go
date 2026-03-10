@@ -57,9 +57,9 @@ func (triangle Triangle) boundingTriangle(canvas *Canvas, color color.NRGBA, per
 		return 0, 0, 0, 0, fmt.Errorf("Triangle has 0 height")
 	}
 
-	total_area := triangle.signed_triangle_area()
+	total_area := math.Abs(triangle.signed_triangle_area()) // absolute to disable backface culling
 	if total_area < 1 {
-		return 0, 0, 0, 0, fmt.Errorf("Triangle area is less than 1 pixel") // backface culling + discarding triangles that cover less than a pixel // TODO: test / improve
+		return 0, 0, 0, 0, fmt.Errorf("Triangle area is less than 1 pixel") // discarding triangles that cover less than a pixel
 	}
 
 	// TODO: add canvas bounds check (via min/max with canvas bounds?)
