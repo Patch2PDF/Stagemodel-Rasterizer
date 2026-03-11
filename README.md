@@ -18,7 +18,7 @@ See below for examples
 ```go
 RasterizerConfig{
   RenderLabels: false,
-  Rotation: rasterizer.Rotation{Alpha: 80, Beta: 0, Gamma: 200},
+  Rotation: rasterizer.Rotation{Alpha: 10, Beta: 0, Gamma: -20},
   OverrideColors: OverrideColorMap{},
   CanvasConfig: CanvasConfig{
 		Width:         4000,
@@ -37,7 +37,7 @@ RasterizerConfig{
 ```go
 RasterizerConfig{
   RenderLabels: true,
-  Rotation: rasterizer.Rotation{Alpha: 90, Beta: 0, Gamma: 180},
+  Rotation: rasterizer.Rotation{Alpha: 0, Beta: 0, Gamma: 0},
   OverrideColors: OverrideColorMap{},
   CanvasConfig: CanvasConfig{
 		Width:         4000,

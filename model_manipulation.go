@@ -91,14 +91,16 @@ func normalizeAndRotateStageModel(canvas *Canvas, stageModel *StageModel, rotati
 	height := float64(canvas.height - 1)
 
 	// normalizing to canvas dimensions
-	diff := theoretical_max.Sub(theoretical_min)
-	scale := width / diff.X
-	if scale*diff.Y >= float64(canvas.height) {
-		scale = height / diff.Y
+	// NOTE: stagemodel coordinate system is z for up and x for right position
+	visualWidth := theoretical_max.X - theoretical_min.X
+	visualHeight := math.Abs(theoretical_max.Z - theoretical_min.Z)
+	scale := width / visualWidth
+	if scale*visualHeight > height {
+		scale = height / visualHeight
 	}
 	centeringMatrix = centeringMatrix.MulScalar(scale)
 	centeringMatrix.X03 += width / 2
-	centeringMatrix.X13 += height / 2
+	centeringMatrix.X23 -= height / 2
 
 	rotateAndTranslateStageModel(stageModel, centeringMatrix)
 }

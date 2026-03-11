@@ -21,10 +21,11 @@ type Triangle struct {
 }
 
 func NewTriangleFromMeshTriangle(triangle MeshTypes.Triangle) Triangle {
+	// NOTE: mesh coordinate system is z for up and x for right position
 	return Triangle{
-		Point{x: math.Round(triangle.V0.Position.X), y: math.Round(triangle.V0.Position.Y), z: triangle.V0.Position.Z},
-		Point{x: math.Round(triangle.V1.Position.X), y: math.Round(triangle.V1.Position.Y), z: triangle.V1.Position.Z},
-		Point{x: math.Round(triangle.V2.Position.X), y: math.Round(triangle.V2.Position.Y), z: triangle.V2.Position.Z},
+		Point{x: (triangle.V0.Position.X), y: -(triangle.V0.Position.Z), z: -triangle.V0.Position.Y},
+		Point{x: (triangle.V1.Position.X), y: -(triangle.V1.Position.Z), z: -triangle.V1.Position.Y},
+		Point{x: (triangle.V2.Position.X), y: -(triangle.V2.Position.Z), z: -triangle.V2.Position.Y},
 	}
 }
 
