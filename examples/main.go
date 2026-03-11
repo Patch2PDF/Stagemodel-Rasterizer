@@ -95,13 +95,13 @@ func main() {
 		LabelFontSize: 10,
 	}
 
-	rotation1 := MeshTypes.GenerateRotationMatrix(80, 0, 200)
+	rotation1 := MeshTypes.GenerateRotationMatrix(10, 0, -20)
 	canvas1, err := rasterizer.Draw(&stage_model, rasterizer.RasterizerConfig{RenderLabels: false, Rotation: rotation1, OverrideColors: overrideColors, CanvasConfig: canvasConfig})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	rotation2 := MeshTypes.GenerateRotationMatrix(90, 0, 180)
+	rotation2 := MeshTypes.GenerateRotationMatrix(0, 0, 0)
 	rotation2 = rotation2.ReverseTransformation(rotation1)
 	rasterizer.SaveCanvasAsPNGFile("side.png", canvas1)
 	canvas2, err := rasterizer.Draw(&stage_model, rasterizer.RasterizerConfig{RenderLabels: true, Rotation: rotation2, OverrideColors: overrideColors, CanvasConfig: canvasConfig})
