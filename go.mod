@@ -5,7 +5,7 @@ go 1.25.6
 require (
 	github.com/Patch2PDF/GDTF-Mesh-Reader/v2 v2.2.0
 	github.com/Patch2PDF/GDTF-Parser v0.4.1
-	github.com/Patch2PDF/MVR-Parser v0.3.2
+	github.com/Patch2PDF/MVR-Parser v0.4.0
 )
 
 require golang.org/x/text v0.35.0 // indirect

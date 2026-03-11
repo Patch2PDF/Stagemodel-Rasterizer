@@ -2,8 +2,8 @@ github.com/Patch2PDF/GDTF-Mesh-Reader/v2 v2.2.0 h1:ykkdyTIl++IaxBbgo2WFF3/k4jy7I
 github.com/Patch2PDF/GDTF-Mesh-Reader/v2 v2.2.0/go.mod h1:zAcGHlYdE75hdFo624nQfQHTzw9+NfPJT8Eo2mB1lI8=
 github.com/Patch2PDF/GDTF-Parser v0.4.1 h1:RLmzQwIHGuEYc6C6hNtWA3HOpjhUizhkg36u0Px1a7E=
 github.com/Patch2PDF/GDTF-Parser v0.4.1/go.mod h1:2l8WWbsYr4D0Uo069HMh9tImKtaUzy2+OeUpl7IN+S4=
-github.com/Patch2PDF/MVR-Parser v0.3.2 h1:Kpq6BUs31KSUhLEg/f16gnRh1t5YD5Y94WeTo9NRGcY=
-github.com/Patch2PDF/MVR-Parser v0.3.2/go.mod h1:2ekLlUhkPCkDli56afCQT/9EGdE/llx3NCF5E1+YiXc=
+github.com/Patch2PDF/MVR-Parser v0.4.0 h1:omEtDUxLBMpaF0C//b93iX/1wr3z/0Eh5LlEIyV+sdQ=
+github.com/Patch2PDF/MVR-Parser v0.4.0/go.mod h1:2ekLlUhkPCkDli56afCQT/9EGdE/llx3NCF5E1+YiXc=
 github.com/go-test/deep v1.0.1 h1:UQhStjbkDClarlmv0am7OXXO4/GaPdCGiUiMTvi28sg=
 github.com/go-test/deep v1.0.1/go.mod h1:wGDj63lr65AM2AQyKZd/NYHGb0R+1RLqB8NKt3aSFNA=
 github.com/qmuntal/gltf v0.28.0 h1:C4A1temWMPtcI2+qNfpfRq8FEJxoBGUN3ZZM8BCc+xU=
